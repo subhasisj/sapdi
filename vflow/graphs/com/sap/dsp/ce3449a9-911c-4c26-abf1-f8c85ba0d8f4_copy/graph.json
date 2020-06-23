@@ -1,0 +1,291 @@
+{
+    "properties": {},
+    "icon": "",
+    "iconsrc": "rlogo.svg",
+    "description": "Copy of UBP - Training_with_metrics ",
+    "processes": {
+        "submitmetrics1": {
+            "component": "com.sap.ml.submitMetrics",
+            "metadata": {
+                "label": "Submit Metrics",
+                "x": 545.9999980926514,
+                "y": 40,
+                "height": 80,
+                "width": 120,
+                "extensible": false,
+                "config": {}
+            }
+        },
+        "artifactproducer1": {
+            "component": "com.sap.ml.artifact.producer",
+            "metadata": {
+                "label": "Artifact Producer",
+                "x": 545.9999980926514,
+                "y": 200,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "config": {
+                    "artifactName": "${newArtifactName}",
+                    "artifactKind": "model",
+                    "versionControl": "conf"
+                }
+            }
+        },
+        "rClient1": {
+            "component": "com.sap.system.rClient3",
+            "metadata": {
+                "label": "RClient - Training",
+                "x": 285,
+                "y": 112,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "config": {
+                    "script": "library(jsonlite)\r\nlibrary(rpart)\r\nlibrary(dplyr)\r\n# library(Hmisc)\r\nlibrary(caret)\r\nlibrary(partykit)\r\nlibrary(onehot)\r\nlibrary(randomForest)\r\n\r\n# convert_to_factors <- function(df){\r\n    \r\n#     train_ohe$Loan_Status <- as.factor(train_ohe$Loan_Status)\r\n#     train_ohe$Education.Graduate <- as.factor(train_ohe$Education.Graduate)\r\n#     train_ohe$Education.Not.Graduate <- as.factor(train_ohe$Education.Not.Graduate)\r\n#     train_ohe$Property_Area.Rural <- as.factor(train_ohe$Property_Area.Rural)\r\n#     train_ohe$Property_Area.Semiurban <- as.factor(train_ohe$Property_Area.Semiurban)\r\n#     train_ohe$Property_Area.Urban <- as.factor(train_ohe$Property_Area.Urban)\r\n#     train_ohe$Gender_Updated.Female <- as.factor(train_ohe$Gender_Updated.Female)\r\n#     train_ohe$Gender_Updated.Male <- as.factor(train_ohe$Gender_Updated.Male)\r\n#     train_ohe$Self_Employed_updated.No <- as.factor(train_ohe$Self_Employed_updated.No)\r\n#     train_ohe$Self_Employed_updated.Yes <- as.factor(train_ohe$Self_Employed_updated.Yes)\r\n#     train_ohe$Married_updated.No <- as.factor(train_ohe$Married_updated.No)\r\n#     train_ohe$Married_updated.Yes <- as.factor(train_ohe$Married_updated.Yes)\r\n#     train_ohe$Dependents_Updated <- as.factor(train_ohe$Dependents_Updated)\r\n\r\n    \r\n    \r\n# }\r\n\r\n\r\n\r\nonInput <- function(input_file) {\r\n    # Get file content.\r\n    #file_content <- rawToChar(input_file$Body)\r\n    train_data<-read.table(text=input_file,header=TRUE, sep=\",\")\r\n    # list(output = toString(dim(train)))\r\n    # list(output = toString(names(train)))\r\n    # list(output = toString(head(train)))\r\n\r\n    \r\n    # rf <- randomForest(\r\n    #   Loan_Status ~ .,\r\n    #   data=train\r\n    # )\r\n    train_data$Loan_Status <- as.factor(train_data$Loan_Status)\r\n    ctrl <- trainControl(method = \"repeatedcv\", number = 10, repeats = 3, allowParallel = TRUE)\r\n    # number : number of fold\r\n    rf <- train(Loan_Status ~ ., data = train_data, method = \"rf\", trControl = ctrl)\r\n        loans_pred_rf <- predict(rf, train_data)\r\n    \r\n    ###inserted\r\n    (rf_conft <- table(\"prediction\" = loans_pred_rf,\r\n                  \"actual\" = train_data$Loan_Status\r\n                  ))\r\n                  \r\n    accuracy <- round((rf_conft[1]+rf_conft[4])/sum(rf_conft[1:4]),4)\r\n    prec_dt <- round(rf_conft[4]/(rf_conft[2]+rf_conft[4]), 4)\r\n    #reca_dt <- round(rf_conft[4]/(rf_conft[4]+rf_conft[3]), 4)\r\n    spec_dt <- round(rf_conft[1]/(rf_conft[1]+rf_conft[2]), 4)\r\n    \r\n    json<-toJSON(data.frame(\r\n        'Accuracy' = toString(accuracy)\r\n    ))\r\n    Accuracy=toString(accuracy)\r\n    Precision=toString(prec_dt)\r\n    Specificity=toString(prec_dt)\r\n    json1<-sprintf('{\"Accuracy\":\"%s\",\"Precision\":\"%s\",\"Specificity\":\"%s\"}', Accuracy,Precision,Specificity)\r\n    metrics <- list(Body=json1, Attributes=list(), Encoding=\"UTF-8\")\r\n    ####inserted\r\n    \r\n    # Produce a model blob from your training dataset.\r\n    conn <- rawConnection(raw(0), \"w\")\r\n    saveRDS(rf, conn)\r\n    modelBlob <- rawConnectionValue(conn)\r\n    \r\n    list(output=modelBlob, metrics=metrics)\r\n    #list(output = modelBlob)\r\n    #list(metrics = metrics)\r\n}\r\n\r\n api$setPortCallback(c(\"input\"), c(\"output\", \"metrics\"), \"onInput\")\r\n#api$setPortCallback(c(\"input\"), c(\"output\"), \"onInput\")\r\n\r\n",
+                    "serverPort": "",
+                    "serverAddress": "",
+                    "debugMode": true,
+                    "metadata": {}
+                },
+                "additionalinports": [
+                    {
+                        "name": "input",
+                        "type": "string"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "metrics",
+                        "type": "message"
+                    },
+                    {
+                        "name": "output",
+                        "type": "blob"
+                    }
+                ]
+            }
+        },
+        "tostringconverter1": {
+            "component": "com.sap.util.toStringConverter",
+            "metadata": {
+                "label": "ToString Converter",
+                "x": 186,
+                "y": 127,
+                "height": 50,
+                "width": 50,
+                "config": {}
+            }
+        },
+        "graphterminator1": {
+            "component": "com.sap.util.graphTerminator",
+            "metadata": {
+                "label": "Graph Terminator",
+                "x": 1090.9999952316284,
+                "y": 112,
+                "height": 80,
+                "width": 120,
+                "config": {}
+            }
+        },
+        "rclient1": {
+            "component": "com.sap.system.rClient3",
+            "metadata": {
+                "label": "Operators Complete",
+                "x": 921.9999952316284,
+                "y": 112,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "config": {
+                    "script": "# When both input ports signals arive, the Artifact Producer & Submit Metrics have completed - safe to terminate the graph.\n\nonInputsReady <- function(metricsResp, artifactId) {\n    # both input ports have data - previous operators have completed. Send a message as output to stop the graph\n    output <- list(Body='Operators completed.', Attributes=list(), Encoding=\"UTF-8\")\n    \n    list(output=output)\n}\n\napi$setPortCallback(c(\"metricsResponse\", \"artifactId\"), c(\"output\"), \"onInputsReady\")\n"
+                },
+                "additionalinports": [
+                    {
+                        "name": "metricsResponse",
+                        "type": "message"
+                    },
+                    {
+                        "name": "artifactId",
+                        "type": "string"
+                    }
+                ],
+                "additionaloutports": [
+                    {
+                        "name": "output",
+                        "type": "message"
+                    }
+                ]
+            }
+        },
+        "tostringconverter2": {
+            "component": "com.sap.util.toStringConverter",
+            "metadata": {
+                "label": "ToString Converter",
+                "x": 806.9999961853027,
+                "y": 141.49999976158142,
+                "height": 50,
+                "width": 50,
+                "config": {}
+            }
+        },
+        "readfile2": {
+            "component": "com.sap.file.read",
+            "metadata": {
+                "label": "Read File",
+                "x": 17,
+                "y": 112,
+                "height": 80,
+                "width": 120,
+                "config": {
+                    "mode": "Once",
+                    "path": "/shared/ml/data/Credit%20Analysis/Full_Data/training.csv",
+                    "connection": {
+                        "configurationType": "Connection Management",
+                        "connectionID": "DI_DATA_LAKE"
+                    }
+                }
+            }
+        }
+    },
+    "groups": [
+        {
+            "name": "group1",
+            "nodes": [
+                "submitmetrics1"
+            ],
+            "metadata": {
+                "description": "Submit Metrics"
+            }
+        },
+        {
+            "name": "group2",
+            "nodes": [
+                "artifactproducer1"
+            ],
+            "metadata": {
+                "description": "Artifact Producer"
+            }
+        },
+        {
+            "name": "group3",
+            "nodes": [
+                "rClient1"
+            ],
+            "metadata": {
+                "description": "Group"
+            },
+            "tags": {
+                "Rdocktumble_Hmisc": ""
+            }
+        }
+    ],
+    "connections": [
+        {
+            "metadata": {
+                "points": "240,152 280,152"
+            },
+            "src": {
+                "port": "outstring",
+                "process": "tostringconverter1"
+            },
+            "tgt": {
+                "port": "input",
+                "process": "rClient1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "409,143 436.99999952316284,143 436.99999952316284,80 540.9999980926514,80"
+            },
+            "src": {
+                "port": "metrics",
+                "process": "rClient1"
+            },
+            "tgt": {
+                "port": "metrics",
+                "process": "submitmetrics1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "409,161 436.99999952316284,161 436.99999952316284,240 512.9999985694885,240 512.9999985694885,231 540.9999980926514,231"
+            },
+            "src": {
+                "port": "output",
+                "process": "rClient1"
+            },
+            "tgt": {
+                "port": "inArtifact",
+                "process": "artifactproducer1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "669.9999980926514,80 773.9999966621399,80 773.9999966621399,112.50000023841858 888.9999957084656,112.50000023841858 888.9999957084656,143 916.9999952316284,143"
+            },
+            "src": {
+                "port": "response",
+                "process": "submitmetrics1"
+            },
+            "tgt": {
+                "port": "metricsResponse",
+                "process": "rclient1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "1045.9999952316284,152 1085.9999952316284,152"
+            },
+            "src": {
+                "port": "output",
+                "process": "rclient1"
+            },
+            "tgt": {
+                "port": "stop",
+                "process": "graphterminator1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "669.9999980926514,231 697.9999976158142,231 697.9999976158142,240 773.9999966621399,240 773.9999966621399,157.49999976158142 801.9999961853027,157.49999976158142"
+            },
+            "src": {
+                "port": "outArtifact",
+                "process": "artifactproducer1"
+            },
+            "tgt": {
+                "port": "ininterface",
+                "process": "tostringconverter2"
+            }
+        },
+        {
+            "metadata": {
+                "points": "860.9999961853027,166.49999976158142 888.9999957084656,166.49999976158142 888.9999957084656,161 916.9999952316284,161"
+            },
+            "src": {
+                "port": "outstring",
+                "process": "tostringconverter2"
+            },
+            "tgt": {
+                "port": "artifactId",
+                "process": "rclient1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "141,143 181,143"
+            },
+            "src": {
+                "port": "file",
+                "process": "readfile2"
+            },
+            "tgt": {
+                "port": "ininterface",
+                "process": "tostringconverter1"
+            }
+        }
+    ],
+    "inports": {},
+    "outports": {}
+}

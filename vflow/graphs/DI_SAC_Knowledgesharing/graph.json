@@ -1,0 +1,290 @@
+{
+    "properties": {},
+    "description": "DI_SAC_Knowledgesharing",
+    "processes": {
+        "decodetable1": {
+            "component": "com.sap.table.decode",
+            "metadata": {
+                "label": "Decode Table",
+                "x": 316.99999809265137,
+                "y": 72,
+                "height": 80,
+                "width": 120,
+                "config": {
+                    "format": "CSV",
+                    "csvHeader": "None"
+                }
+            }
+        },
+        "12multiplexer1": {
+            "component": "com.sap.system.multiplexer.1-2",
+            "metadata": {
+                "label": "1:2 Multiplexer",
+                "x": 485.99999809265137,
+                "y": 72,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "config": {}
+            }
+        },
+        "wiretap2": {
+            "component": "com.sap.util.wiretap",
+            "metadata": {
+                "label": "Wiretap",
+                "x": 670.999997138977,
+                "y": 12,
+                "height": 80,
+                "width": 120,
+                "ui": "dynpath",
+                "config": {}
+            }
+        },
+        "sapanalyticscloudformatterbeta1": {
+            "component": "com.sap.sac.formatter",
+            "metadata": {
+                "label": "SAP Analytics Cloud Formatter (Beta)",
+                "x": 670.999997138977,
+                "y": 132,
+                "height": 80,
+                "width": 120,
+                "extensible": true,
+                "config": {
+                    "tenant": "https://analytics-fsi.eu10.sapanalytics.cloud/",
+                    "name": "CENSUS_DI_210520",
+                    "description": "from SAP DI",
+                    "inferColumnInfo": false,
+                    "outputSchema": [
+                        {
+                            "name": "ID",
+                            "class": "number"
+                        },
+                        {
+                            "name": "AGE",
+                            "class": "number"
+                        },
+                        {
+                            "name": "WORKCLASS",
+                            "class": "string",
+                            "size": 16
+                        },
+                        {
+                            "class": "number",
+                            "name": "FNLWGT"
+                        },
+                        {
+                            "name": "EDUCATION",
+                            "class": "string",
+                            "size": 12
+                        },
+                        {
+                            "name": "EDUCATION_NUM",
+                            "class": "number"
+                        },
+                        {
+                            "name": "MARITAL_STATUS",
+                            "class": "string",
+                            "size": 22
+                        },
+                        {
+                            "name": "OCCUPATION",
+                            "class": "string",
+                            "size": 17
+                        },
+                        {
+                            "name": "RELATIONSHIP",
+                            "class": "string",
+                            "size": 14
+                        },
+                        {
+                            "name": "RACE",
+                            "class": "string",
+                            "size": 18
+                        },
+                        {
+                            "name": "SEX",
+                            "class": "string",
+                            "size": 6
+                        },
+                        {
+                            "name": "CAPITAL_GAIN",
+                            "class": "number"
+                        },
+                        {
+                            "name": "CAPITAL_LOSS",
+                            "class": "number"
+                        },
+                        {
+                            "name": "HOURSPERWEEK",
+                            "class": "number"
+                        },
+                        {
+                            "name": "NATIVE",
+                            "class": "string",
+                            "size": 26
+                        },
+                        {
+                            "name": "CLASS",
+                            "class": "number"
+                        }
+                    ]
+                }
+            }
+        },
+        "sapanalyticscloudproducerbeta1": {
+            "component": "com.sap.sac.producer",
+            "metadata": {
+                "label": "SAP Analytics Cloud Producer (Beta)",
+                "x": 855.9999961853027,
+                "y": 72,
+                "height": 80,
+                "width": 120,
+                "ui": "dynpath",
+                "config": {
+                    "host": "analytics-fsi.eu10.sapanalytics.cloud",
+                    "oauth2TokenUrl": "https://analytics-fsi.authentication.eu10.hana.ondemand.com/oauth/token",
+                    "oauth2AuthUrl": "https://analytics-fsi.authentication.eu10.hana.ondemand.com/oauth/authorize",
+                    "oauth2ClientId": "sb-11b0cc50-f549-4cf1-87a7-aa8207428c84!b37746|client!b3650",
+                    "oauth2ClientSecret": "1X3cp1cxTWFWVnolzAFZD0AudPw="
+                }
+            }
+        },
+        "wiretap3": {
+            "component": "com.sap.util.wiretap",
+            "metadata": {
+                "label": "Wiretap",
+                "x": 1024.9999961853027,
+                "y": 72,
+                "height": 80,
+                "width": 120,
+                "ui": "dynpath",
+                "config": {}
+            }
+        },
+        "readfile1": {
+            "component": "com.sap.file.read",
+            "metadata": {
+                "label": "Read File",
+                "x": 17,
+                "y": 72,
+                "height": 80,
+                "width": 120,
+                "config": {
+                    "mode": "Once",
+                    "connection": {
+                        "configurationType": "Connection Management",
+                        "connectionID": "GCP_SN"
+                    },
+                    "path": "/Census.csv"
+                }
+            }
+        },
+        "fromfile1": {
+            "component": "com.sap.file.fromFile",
+            "metadata": {
+                "label": "From File",
+                "x": 201.99999904632568,
+                "y": 87,
+                "height": 50,
+                "width": 50,
+                "config": {}
+            }
+        }
+    },
+    "groups": [],
+    "connections": [
+        {
+            "metadata": {
+                "points": "440.99999809265137,112 480.99999809265137,112"
+            },
+            "src": {
+                "port": "output",
+                "process": "decodetable1"
+            },
+            "tgt": {
+                "port": "in1",
+                "process": "12multiplexer1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "609.9999980926514,103 637.9999976158142,103 637.9999976158142,52 665.999997138977,52"
+            },
+            "src": {
+                "port": "out1",
+                "process": "12multiplexer1"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "wiretap2"
+            }
+        },
+        {
+            "metadata": {
+                "points": "609.9999980926514,121 637.9999976158142,121 637.9999976158142,172 665.999997138977,172"
+            },
+            "src": {
+                "port": "out2",
+                "process": "12multiplexer1"
+            },
+            "tgt": {
+                "port": "input",
+                "process": "sapanalyticscloudformatterbeta1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "794.999997138977,172 822.9999966621399,172 822.9999966621399,112 850.9999961853027,112"
+            },
+            "src": {
+                "port": "output",
+                "process": "sapanalyticscloudformatterbeta1"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "sapanalyticscloudproducerbeta1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "979.9999961853027,112 1019.9999961853027,112"
+            },
+            "src": {
+                "port": "out",
+                "process": "sapanalyticscloudproducerbeta1"
+            },
+            "tgt": {
+                "port": "in",
+                "process": "wiretap3"
+            }
+        },
+        {
+            "metadata": {
+                "points": "141,103 168.99999952316284,103 168.99999952316284,112 196.99999904632568,112"
+            },
+            "src": {
+                "port": "file",
+                "process": "readfile1"
+            },
+            "tgt": {
+                "port": "file",
+                "process": "fromfile1"
+            }
+        },
+        {
+            "metadata": {
+                "points": "255.99999904632568,121 283.9999985694885,121 283.9999985694885,112 311.99999809265137,112"
+            },
+            "src": {
+                "port": "message",
+                "process": "fromfile1"
+            },
+            "tgt": {
+                "port": "input",
+                "process": "decodetable1"
+            }
+        }
+    ],
+    "inports": {},
+    "outports": {}
+}
